@@ -1,1 +1,1 @@
-# k3s-actions
+# tekton-actions

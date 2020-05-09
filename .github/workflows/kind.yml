@@ -1,0 +1,20 @@
+name: kind-tekton
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup kind
+        run: |
+          curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.8.0/kind-$(uname)-amd64
+          chmod +x ./kind && sudo mv ./kind /usr/local/bin/kind
+          kind create cluster --wait 2m --name tekton
+      - name: Setup Tekton
+        run: ./.github/workflows/install_tekton.sh
+      - name: Run the pipeline
+        run: |
+          kubectl apply -f pipeline.yaml
+          tkn pipeline start pipeline -p who=$GITHUB_ACTOR --showlog

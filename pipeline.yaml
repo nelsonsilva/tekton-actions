@@ -1,0 +1,59 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: say-hello
+spec:
+  params:
+    - name: who
+      type: string
+      description: Who to greet
+      default: You
+  steps:
+    - name: echo
+      image: ubuntu
+      command:
+        - echo
+      args:
+        - "Hello $(params.who) 👋"
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: say-goodbye
+spec:
+  params:
+    - name: who
+      type: string
+      description: Who to say goodbye
+      default: You
+  steps:
+    - name: echo
+      image: ubuntu
+      command:
+        - echo
+      args:
+        - "Goodbye $(params.who) 👋"
+---
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: pipeline
+spec:
+  params:
+    - name: who
+      type: string
+      description: Who to greet
+      default: World
+  tasks:
+    - name: hello
+      taskRef:
+        name: say-hello
+      params:
+        - name: who
+          value: $(params.who)
+    - name: goodbye
+      taskRef:
+        name: say-goodbye
+      params:
+        - name: who
+          value: $(params.who)

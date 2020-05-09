@@ -1,0 +1,19 @@
+name: k3s-tekton
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup k3s
+        run: |
+          curl -sfL https://get.k3s.io | sh -s - --write-kubeconfig-mode 644
+          mkdir ~/.kube && cp /etc/rancher/k3s/k3s.yaml ~/.kube/config
+      - name: Setup Tekton
+        run: ./.github/workflows/install_tekton.sh
+      - name: Run the pipeline
+        run: |
+          kubectl apply -f pipeline.yaml
+          tkn pipeline start pipeline -p who=$GITHUB_ACTOR --showlog
